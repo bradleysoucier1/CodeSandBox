@@ -63,6 +63,10 @@ const fullscreenViewBtn = document.getElementById("fullscreenViewBtn");
 const renameSandboxBtn = document.getElementById("renameSandboxBtn");
 const goDashboardBtn = document.getElementById("goDashboardBtn");
 const deleteSandboxBtn = document.getElementById("deleteSandboxBtn");
+const renameModal = document.getElementById("renameModal");
+const renameInput = document.getElementById("renameInput");
+const renameConfirmBtn = document.getElementById("renameConfirmBtn");
+const renameCancelBtn = document.getElementById("renameCancelBtn");
 
 const editorPane = document.getElementById("editorPane");
 const previewPane = document.getElementById("previewPane");
@@ -229,15 +233,29 @@ async function saveSandbox() {
   setStatus("Saved.");
 }
 
-async function renameSandbox() {
+function openRenameModal() {
+  if (!activeSandbox || !currentUser) {
+    setStatus("Open a sandbox before renaming.");
+    return;
+  }
+
+  renameInput.value = activeSandbox.title || "Untitled Sandbox";
+  renameModal.classList.remove("hidden");
+  renameInput.focus();
+  renameInput.select();
+}
+
+function closeRenameModal() {
+  renameModal.classList.add("hidden");
+}
+
+async function confirmRenameSandbox() {
   if (!activeSandbox || !currentUser) return;
 
-  const nextTitle = prompt("Enter a new sandbox name:", activeSandbox.title || "Untitled Sandbox");
-  if (nextTitle === null) return;
-
-  const trimmed = nextTitle.trim();
+  const trimmed = renameInput.value.trim();
   if (!trimmed) {
     setStatus("Sandbox name cannot be empty.");
+    renameInput.focus();
     return;
   }
 
@@ -248,13 +266,14 @@ async function renameSandbox() {
 
   activeSandbox.title = trimmed;
   sandboxTitle.textContent = trimmed;
+  closeRenameModal();
   setStatus("Sandbox renamed.");
 }
-
 async function renderApp() {
   const { sandboxId, view } = readRoute();
   document.body.classList.remove("fullscreen-preview");
   fullscreenPreviewSection.classList.add("hidden");
+  closeRenameModal();
   authSection.classList.toggle("hidden", !!currentUser);
   dashboardSection.classList.add("hidden");
   sandboxSection.classList.add("hidden");
@@ -367,11 +386,34 @@ fullscreenViewBtn.addEventListener("click", () => {
   window.open(getFullscreenPreviewUrl(activeSandbox.id), "_blank", "noopener,noreferrer");
 });
 
-renameSandboxBtn.addEventListener("click", async () => {
+renameSandboxBtn.addEventListener("click", () => {
+  openRenameModal();
+});
+
+renameCancelBtn.addEventListener("click", () => {
+  closeRenameModal();
+});
+
+renameConfirmBtn.addEventListener("click", async () => {
   try {
-    await renameSandbox();
+    await confirmRenameSandbox();
   } catch (error) {
     setStatus(error.message);
+  }
+});
+
+renameInput.addEventListener("keydown", async (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    try {
+      await confirmRenameSandbox();
+    } catch (error) {
+      setStatus(error.message);
+    }
+  }
+
+  if (event.key === "Escape") {
+    closeRenameModal();
   }
 });
 

@@ -97,6 +97,20 @@
         <iframe id="fullscreenPreviewFrame" title="Fullscreen sandbox preview"></iframe>
       </section>
 
+      <div id="renameModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="renameHeading">
+        <div class="modal-card">
+          <h3 id="renameHeading">Rename Sandbox</h3>
+          <label>
+            New name
+            <input id="renameInput" type="text" maxlength="120" />
+          </label>
+          <div class="row">
+            <button id="renameConfirmBtn">Save name</button>
+            <button id="renameCancelBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
       <p id="status" aria-live="polite"></p>
     </main>
 
