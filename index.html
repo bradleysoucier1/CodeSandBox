@@ -54,6 +54,7 @@
             <button id="goDashboardBtn" class="secondary">Back</button>
             <button id="editorViewBtn">Editor</button>
             <button id="previewViewBtn">Preview</button>
+            <button id="historyViewBtn">History</button>
             <button id="fullscreenViewBtn">Fullscreen Preview</button>
             <button id="renameSandboxBtn" class="secondary">Rename</button>
             <button id="deleteSandboxBtn" class="danger">Delete</button>
@@ -90,6 +91,15 @@
           <h3>Preview</h3>
           <iframe id="previewFrame" title="Sandbox preview"></iframe>
         </div>
+
+        <div id="historyPane" class="card hidden">
+          <div class="row space-between align-center">
+            <h3>History</h3>
+            <small>Restore a previous version of this sandbox.</small>
+          </div>
+          <div id="historyList" class="list"></div>
+        </div>
+
       </section>
 
 

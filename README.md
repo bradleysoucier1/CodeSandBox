@@ -3,10 +3,11 @@
 Simple browser-based code sandbox with:
 
 - Firebase Authentication (Google + email/password)
-- Firestore-backed sandbox CRUD (create/rename/delete/save)
+- Firestore-backed sandbox CRUD (create/rename/delete/save/history restore)
 - Query-param routing:
   - Editor: `?sb=[sandbox id]&view=editor`
   - Preview: `?sb=[sandbox id]&view=preview`
+  - History: `?sb=[sandbox id]&view=history`
   - Fullscreen preview: `?sb=[sandbox id]&view=fspv`
 - HTML/CSS/JS editing plus file upload (`.html`, `.css`, `.js`)
 

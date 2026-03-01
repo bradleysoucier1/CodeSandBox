@@ -59,6 +59,7 @@ const sandboxTitle = document.getElementById("sandboxTitle");
 const sandboxMeta = document.getElementById("sandboxMeta");
 const editorViewBtn = document.getElementById("editorViewBtn");
 const previewViewBtn = document.getElementById("previewViewBtn");
+const historyViewBtn = document.getElementById("historyViewBtn");
 const fullscreenViewBtn = document.getElementById("fullscreenViewBtn");
 const renameSandboxBtn = document.getElementById("renameSandboxBtn");
 const goDashboardBtn = document.getElementById("goDashboardBtn");
@@ -70,6 +71,8 @@ const renameCancelBtn = document.getElementById("renameCancelBtn");
 
 const editorPane = document.getElementById("editorPane");
 const previewPane = document.getElementById("previewPane");
+const historyPane = document.getElementById("historyPane");
+const historyList = document.getElementById("historyList");
 const htmlInput = document.getElementById("htmlInput");
 const cssInput = document.getElementById("cssInput");
 const jsInput = document.getElementById("jsInput");
@@ -132,6 +135,84 @@ ${jsInput.value}
   fullscreenPreviewFrame.srcdoc = source;
 }
 
+async function appendHistorySnapshot(sandboxId, snapshot) {
+  if (!currentUser || !sandboxId) return;
+  await addDoc(collection(db, "sandboxes", sandboxId, "history"), {
+    ownerId: currentUser.uid,
+    title: snapshot.title || "Untitled Sandbox",
+    html: snapshot.html || "",
+    css: snapshot.css || "",
+    js: snapshot.js || "",
+    createdAt: serverTimestamp(),
+  });
+}
+
+function formatHistoryDate(timestamp) {
+  if (!timestamp?.toDate) return "Pending timestamp";
+  return timestamp.toDate().toLocaleString();
+}
+
+function renderHistoryList(entries) {
+  if (!entries.length) {
+    historyList.innerHTML = "<p>No history yet. Save your sandbox to create snapshots.</p>";
+    return;
+  }
+
+  historyList.innerHTML = "";
+  for (const entry of entries) {
+    const row = document.createElement("div");
+    row.className = "list-item";
+    row.innerHTML = `
+      <div>
+        <strong>${entry.title || "Untitled Snapshot"}</strong><br />
+        <small>${formatHistoryDate(entry.createdAt)}</small>
+      </div>
+      <div class="row">
+        <button data-restore="${entry.id}">Restore</button>
+      </div>
+    `;
+    historyList.appendChild(row);
+  }
+
+  historyList.querySelectorAll("button[data-restore]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const entry = entries.find((item) => item.id === btn.dataset.restore);
+      if (!entry) return;
+      if (!confirm("Restore this snapshot? Current content will be replaced.")) return;
+      await restoreHistoryEntry(entry);
+    });
+  });
+}
+
+async function loadHistoryEntries() {
+  if (!currentUser || !activeSandbox?.id) return;
+  const q = query(collection(db, "sandboxes", activeSandbox.id, "history"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+  const entries = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+  renderHistoryList(entries);
+}
+
+async function restoreHistoryEntry(entry) {
+  if (!activeSandbox || !currentUser) return;
+
+  htmlInput.value = entry.html || "";
+  cssInput.value = entry.css || "";
+  jsInput.value = entry.js || "";
+
+  await updateDoc(doc(db, "sandboxes", activeSandbox.id), {
+    title: entry.title || activeSandbox.title || "Untitled Sandbox",
+    html: htmlInput.value,
+    css: cssInput.value,
+    js: jsInput.value,
+    updatedAt: serverTimestamp(),
+  });
+
+  activeSandbox.title = entry.title || activeSandbox.title;
+  sandboxTitle.textContent = activeSandbox.title || "Untitled Sandbox";
+  renderPreview();
+  setStatus("Restored snapshot.");
+}
+
 async function createSandbox() {
   if (!currentUser) return;
   const created = await addDoc(collection(db, "sandboxes"), {
@@ -140,6 +221,7 @@ async function createSandbox() {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+  await appendHistorySnapshot(created.id, defaultSandboxContent);
   navigate({ sandboxId: created.id, view: "editor" });
 }
 
@@ -230,6 +312,16 @@ async function saveSandbox() {
     js: jsInput.value,
     updatedAt: serverTimestamp(),
   });
+
+  activeSandbox.html = htmlInput.value;
+  activeSandbox.css = cssInput.value;
+  activeSandbox.js = jsInput.value;
+  await appendHistorySnapshot(activeSandbox.id, {
+    title: activeSandbox.title,
+    html: activeSandbox.html,
+    css: activeSandbox.css,
+    js: activeSandbox.js,
+  });
   setStatus("Saved.");
 }
 
@@ -266,6 +358,12 @@ async function confirmRenameSandbox() {
 
   activeSandbox.title = trimmed;
   sandboxTitle.textContent = trimmed;
+  await appendHistorySnapshot(activeSandbox.id, {
+    title: activeSandbox.title,
+    html: htmlInput.value,
+    css: cssInput.value,
+    js: jsInput.value,
+  });
   closeRenameModal();
   setStatus("Sandbox renamed.");
 }
@@ -277,6 +375,9 @@ async function renderApp() {
   authSection.classList.toggle("hidden", !!currentUser);
   dashboardSection.classList.add("hidden");
   sandboxSection.classList.add("hidden");
+  editorPane.classList.add("hidden");
+  previewPane.classList.add("hidden");
+  historyPane.classList.add("hidden");
   userInfo.classList.toggle("hidden", !currentUser);
 
   if (!currentUser) {
@@ -302,6 +403,13 @@ async function renderApp() {
     fullscreenPreviewSection.classList.remove("hidden");
     previewPane.classList.add("hidden");
     editorPane.classList.add("hidden");
+    return;
+  }
+
+  const historyMode = view === "history";
+  if (historyMode) {
+    historyPane.classList.remove("hidden");
+    await loadHistoryEntries();
     return;
   }
 
@@ -381,6 +489,7 @@ newSandboxBtn.addEventListener("click", async () => {
 goDashboardBtn.addEventListener("click", () => navigate({ sandboxId: null }));
 editorViewBtn.addEventListener("click", () => navigate({ sandboxId: activeSandbox?.id, view: "editor" }));
 previewViewBtn.addEventListener("click", () => navigate({ sandboxId: activeSandbox?.id, view: "preview" }));
+historyViewBtn.addEventListener("click", () => navigate({ sandboxId: activeSandbox?.id, view: "history" }));
 fullscreenViewBtn.addEventListener("click", () => {
   if (!activeSandbox?.id) return;
   window.open(getFullscreenPreviewUrl(activeSandbox.id), "_blank", "noopener,noreferrer");
