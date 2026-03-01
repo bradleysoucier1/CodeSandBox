@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Firebase Code Sandbox</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Code Sandbox</h1>
+      <div id="userInfo" class="hidden"></div>
+    </header>
+
+    <main class="container">
+      <section id="authSection" class="card hidden">
+        <h2>Login / Sign Up</h2>
+        <p>Use Google or email/password to access your sandboxes.</p>
+        <div class="auth-grid">
+          <label>
+            Email
+            <input id="emailInput" type="email" placeholder="you@example.com" />
+          </label>
+          <label>
+            Password
+            <input id="passwordInput" type="password" placeholder="••••••••" minlength="6" />
+          </label>
+        </div>
+        <div class="row">
+          <button id="signInBtn">Sign In</button>
+          <button id="signUpBtn" class="secondary">Sign Up</button>
+          <button id="googleBtn" class="google">Continue with Google</button>
+        </div>
+      </section>
+
+      <section id="dashboardSection" class="card hidden">
+        <div class="row space-between align-center">
+          <h2>Your Sandboxes</h2>
+          <div class="row">
+            <button id="newSandboxBtn">New Sandbox</button>
+            <button id="logoutBtn" class="secondary">Log Out</button>
+          </div>
+        </div>
+        <div id="sandboxList" class="list"></div>
+      </section>
+
+      <section id="sandboxSection" class="hidden">
+        <div class="card row space-between align-center">
+          <div>
+            <h2 id="sandboxTitle">Sandbox</h2>
+            <small id="sandboxMeta"></small>
+          </div>
+          <div class="row">
+            <button id="goDashboardBtn" class="secondary">Back</button>
+            <button id="editorViewBtn">Editor</button>
+            <button id="previewViewBtn">Preview</button>
+            <button id="fullscreenViewBtn">Fullscreen Preview</button>
+            <button id="renameSandboxBtn" class="secondary">Rename</button>
+            <button id="deleteSandboxBtn" class="danger">Delete</button>
+            <button id="logoutBtn2" class="secondary">Log Out</button>
+          </div>
+        </div>
+
+        <div id="editorPane" class="card hidden">
+          <div class="row space-between align-center">
+            <h3>Editor</h3>
+            <div class="row">
+              <input id="fileUpload" type="file" accept=".html,.css,.js,text/html,text/css,application/javascript" />
+              <button id="saveBtn">Save</button>
+            </div>
+          </div>
+          <p class="hint">Upload .html/.css/.js files or edit manually.</p>
+          <div class="editor-grid">
+            <label>
+              HTML
+              <textarea id="htmlInput" spellcheck="false"></textarea>
+            </label>
+            <label>
+              CSS
+              <textarea id="cssInput" spellcheck="false"></textarea>
+            </label>
+            <label>
+              JavaScript
+              <textarea id="jsInput" spellcheck="false"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div id="previewPane" class="card hidden">
+          <h3>Preview</h3>
+          <iframe id="previewFrame" title="Sandbox preview"></iframe>
+        </div>
+      </section>
+
+
+      <section id="fullscreenPreviewSection" class="hidden">
+        <iframe id="fullscreenPreviewFrame" title="Fullscreen sandbox preview"></iframe>
+      </section>
+
+      <div id="renameModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="renameHeading">
+        <div class="modal-card">
+          <h3 id="renameHeading">Rename Sandbox</h3>
+          <label>
+            New name
+            <input id="renameInput" type="text" maxlength="120" />
+          </label>
+          <div class="row">
+            <button id="renameConfirmBtn">Save name</button>
+            <button id="renameCancelBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <p id="status" aria-live="polite"></p>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
