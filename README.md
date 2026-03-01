@@ -7,6 +7,7 @@ Simple browser-based code sandbox with:
 - Query-param routing:
   - Editor: `?sb=[sandbox id]&view=editor`
   - Preview: `?sb=[sandbox id]&view=preview`
+  - Fullscreen preview: `?sb=[sandbox id]&view=fspv`
 - HTML/CSS/JS editing plus file upload (`.html`, `.css`, `.js`)
 
 ## Local run

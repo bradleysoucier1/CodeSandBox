@@ -59,6 +59,7 @@ const sandboxTitle = document.getElementById("sandboxTitle");
 const sandboxMeta = document.getElementById("sandboxMeta");
 const editorViewBtn = document.getElementById("editorViewBtn");
 const previewViewBtn = document.getElementById("previewViewBtn");
+const fullscreenViewBtn = document.getElementById("fullscreenViewBtn");
 const goDashboardBtn = document.getElementById("goDashboardBtn");
 const deleteSandboxBtn = document.getElementById("deleteSandboxBtn");
 
@@ -70,6 +71,8 @@ const jsInput = document.getElementById("jsInput");
 const saveBtn = document.getElementById("saveBtn");
 const fileUpload = document.getElementById("fileUpload");
 const previewFrame = document.getElementById("previewFrame");
+const fullscreenPreviewSection = document.getElementById("fullscreenPreviewSection");
+const fullscreenPreviewFrame = document.getElementById("fullscreenPreviewFrame");
 
 let currentUser = null;
 let activeSandbox = null;
@@ -121,6 +124,7 @@ ${jsInput.value}
 </body>
 </html>`;
   previewFrame.srcdoc = source;
+  fullscreenPreviewFrame.srcdoc = source;
 }
 
 async function createSandbox() {
@@ -226,6 +230,8 @@ async function saveSandbox() {
 
 async function renderApp() {
   const { sandboxId, view } = readRoute();
+  document.body.classList.remove("fullscreen-preview");
+  fullscreenPreviewSection.classList.add("hidden");
   authSection.classList.toggle("hidden", !!currentUser);
   dashboardSection.classList.add("hidden");
   sandboxSection.classList.add("hidden");
@@ -248,9 +254,25 @@ async function renderApp() {
   activeSandbox = await loadActiveSandbox(sandboxId);
   populateEditor(activeSandbox);
 
+  const fullscreenMode = view === "fspv";
+  if (fullscreenMode) {
+    document.body.classList.add("fullscreen-preview");
+    fullscreenPreviewSection.classList.remove("hidden");
+    previewPane.classList.add("hidden");
+    editorPane.classList.add("hidden");
+    return;
+  }
+
   const previewMode = view === "preview";
   editorPane.classList.toggle("hidden", previewMode);
   previewPane.classList.toggle("hidden", !previewMode);
+}
+
+function getFullscreenPreviewUrl(sandboxId) {
+  const params = new URLSearchParams();
+  params.set("sb", sandboxId);
+  params.set("view", "fspv");
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 }
 
 async function handleUpload(file) {
@@ -317,6 +339,10 @@ newSandboxBtn.addEventListener("click", async () => {
 goDashboardBtn.addEventListener("click", () => navigate({ sandboxId: null }));
 editorViewBtn.addEventListener("click", () => navigate({ sandboxId: activeSandbox?.id, view: "editor" }));
 previewViewBtn.addEventListener("click", () => navigate({ sandboxId: activeSandbox?.id, view: "preview" }));
+fullscreenViewBtn.addEventListener("click", () => {
+  if (!activeSandbox?.id) return;
+  window.open(getFullscreenPreviewUrl(activeSandbox.id), "_blank", "noopener,noreferrer");
+});
 
 deleteSandboxBtn.addEventListener("click", async () => {
   if (!activeSandbox) return;

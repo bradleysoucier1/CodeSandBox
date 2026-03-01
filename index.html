@@ -54,6 +54,7 @@
             <button id="goDashboardBtn" class="secondary">Back</button>
             <button id="editorViewBtn">Editor</button>
             <button id="previewViewBtn">Preview</button>
+            <button id="fullscreenViewBtn">Fullscreen Preview</button>
             <button id="deleteSandboxBtn" class="danger">Delete</button>
             <button id="logoutBtn2" class="secondary">Log Out</button>
           </div>
@@ -88,6 +89,11 @@
           <h3>Preview</h3>
           <iframe id="previewFrame" title="Sandbox preview"></iframe>
         </div>
+      </section>
+
+
+      <section id="fullscreenPreviewSection" class="hidden">
+        <iframe id="fullscreenPreviewFrame" title="Fullscreen sandbox preview"></iframe>
       </section>
 
       <p id="status" aria-live="polite"></p>

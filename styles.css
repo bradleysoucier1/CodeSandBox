@@ -144,3 +144,27 @@ textarea {
 small {
   color: var(--muted);
 }
+
+body.fullscreen-preview {
+  background: #fff;
+}
+
+body.fullscreen-preview .app-header,
+body.fullscreen-preview #authSection,
+body.fullscreen-preview #dashboardSection,
+body.fullscreen-preview #sandboxSection,
+body.fullscreen-preview #status {
+  display: none !important;
+}
+
+#fullscreenPreviewSection {
+  margin: 0;
+}
+
+#fullscreenPreviewFrame {
+  border: none;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  background: #fff;
+}
