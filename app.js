@@ -60,6 +60,7 @@ const sandboxMeta = document.getElementById("sandboxMeta");
 const editorViewBtn = document.getElementById("editorViewBtn");
 const previewViewBtn = document.getElementById("previewViewBtn");
 const fullscreenViewBtn = document.getElementById("fullscreenViewBtn");
+const renameSandboxBtn = document.getElementById("renameSandboxBtn");
 const goDashboardBtn = document.getElementById("goDashboardBtn");
 const deleteSandboxBtn = document.getElementById("deleteSandboxBtn");
 
@@ -228,6 +229,28 @@ async function saveSandbox() {
   setStatus("Saved.");
 }
 
+async function renameSandbox() {
+  if (!activeSandbox || !currentUser) return;
+
+  const nextTitle = prompt("Enter a new sandbox name:", activeSandbox.title || "Untitled Sandbox");
+  if (nextTitle === null) return;
+
+  const trimmed = nextTitle.trim();
+  if (!trimmed) {
+    setStatus("Sandbox name cannot be empty.");
+    return;
+  }
+
+  await updateDoc(doc(db, "sandboxes", activeSandbox.id), {
+    title: trimmed,
+    updatedAt: serverTimestamp(),
+  });
+
+  activeSandbox.title = trimmed;
+  sandboxTitle.textContent = trimmed;
+  setStatus("Sandbox renamed.");
+}
+
 async function renderApp() {
   const { sandboxId, view } = readRoute();
   document.body.classList.remove("fullscreen-preview");
@@ -342,6 +365,14 @@ previewViewBtn.addEventListener("click", () => navigate({ sandboxId: activeSandb
 fullscreenViewBtn.addEventListener("click", () => {
   if (!activeSandbox?.id) return;
   window.open(getFullscreenPreviewUrl(activeSandbox.id), "_blank", "noopener,noreferrer");
+});
+
+renameSandboxBtn.addEventListener("click", async () => {
+  try {
+    await renameSandbox();
+  } catch (error) {
+    setStatus(error.message);
+  }
 });
 
 deleteSandboxBtn.addEventListener("click", async () => {

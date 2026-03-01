@@ -149,6 +149,25 @@ body.fullscreen-preview {
   background: #fff;
 }
 
+html,
+body {
+  width: 100%;
+}
+
+body.fullscreen-preview,
+body.fullscreen-preview main,
+body.fullscreen-preview .container,
+body.fullscreen-preview #fullscreenPreviewSection {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  max-width: none !important;
+}
+
+body.fullscreen-preview {
+  overflow: hidden;
+}
+
 body.fullscreen-preview .app-header,
 body.fullscreen-preview #authSection,
 body.fullscreen-preview #dashboardSection,
